@@ -16,13 +16,17 @@ const io = socketio(expressServer, {
 });
 
 io.on("connection", (socket) => {
-  socket.emit("messageFromServer", "Welcome to the socket.io server!");
-  socket.on("messageToServer", (dataFromClient) => {
-    console.log(dataFromClient);
+  // build an array to send back with the img and endpoint for each NS
+  let nsData = namespaces.map((ns) => {
+    return {
+      img: ns.img,
+      endpoint: ns.endpoint,
+    };
   });
-  socket.on("newMessageToServer", (msg) => {
-    io.of("/").emit("messageToClients", { text: msg.text });
-  });
+
+  // send nsData back to the client. We need to use socket, NOT io
+  // because we want it to go to just client.
+  socket.emit("nsList", nsData);
 });
 
 // loop through each namespace and listen for a connection
