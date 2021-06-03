@@ -37,6 +37,6 @@ linuxNs.addRoom(new Room(1, "Red Hat", "Linux"));
 linuxNs.addRoom(new Room(2, "MacOs", "Linux"));
 linuxNs.addRoom(new Room(3, "Kernal Development", "Linux"));
 
-namespaces.push(wikiNs, mozNs, wikiNs);
+namespaces.push(wikiNs, mozNs, linuxNs);
 
 module.exports = namespaces;
