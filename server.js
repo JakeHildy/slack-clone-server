@@ -36,25 +36,45 @@ namespaces.forEach((namespace) => {
 
     // Send the ns group info back
     nsSocket.emit("nsRoomLoad", namespace.rooms);
-    nsSocket.on("joinRoom", async (roomToJoin, numberOfUsersCallback) => {
-      // Leave current room
-      nsSocket.leave(Array.from(nsSocket.rooms)[1]);
+    nsSocket.on("joinRoom", async (roomToJoin) => {
+      // Leave current room and send updated room count to room.
+      const currentRoom = Array.from(nsSocket.rooms)[1];
+      nsSocket.leave(currentRoom);
+      const updatedNumUsers = await getNumUsersInRoom(
+        namespace.endpoint,
+        currentRoom
+      );
+      io.of(namespace.endpoint)
+        .in(currentRoom)
+        .emit("updateMembers", updatedNumUsers);
+
       // Join Room
       nsSocket.join(roomToJoin);
 
+      // Find the current room
       const nsRoom = namespace.rooms.find(
         (room) => room.roomTitle === Array.from(nsSocket.rooms)[1]
       );
-      console.log(nsRoom);
-      nsSocket.emit("historyCatchUp", nsRoom.history);
 
-      const allSockets = await io
-        .of(namespace.endpoint)
-        .in(roomToJoin)
-        .allSockets();
-      const clients = Array.from(allSockets);
-      numberOfUsersCallback(clients.length);
+      // Send out the room history to client
+      if (nsRoom) nsSocket.emit("historyCatchUp", nsRoom.history);
+
+      // Send back the number of users in this room to ALL sockets connected to this roomTitle
+      const numUsers = await getNumUsersInRoom(namespace.endpoint, roomToJoin);
+      io.of(namespace.endpoint).in(roomToJoin).emit("updateMembers", numUsers);
     });
+
+    const getNumUsersInRoom = (namespace, room) => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const allSockets = await io.of(namespace).in(room).allSockets();
+          const clients = Array.from(allSockets);
+          resolve(clients.length);
+        } catch (error) {
+          reject(new Error(error));
+        }
+      });
+    };
 
     nsSocket.on("newMessageToServer", (msg) => {
       // Send this mesage to ALL the sockets that are in the room that THIS socket is in.
