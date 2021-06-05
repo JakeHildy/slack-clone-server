@@ -32,6 +32,7 @@ io.on("connection", (socket) => {
 // loop through each namespace and listen for a connection
 namespaces.forEach((namespace) => {
   io.of(namespace.endpoint).on("connection", (nsSocket) => {
+    const username = nsSocket.handshake.query.username;
     console.log(`${nsSocket.id} has joined ${namespace.endpoint}`);
 
     // Send the ns group info back
@@ -82,7 +83,7 @@ namespaces.forEach((namespace) => {
       const fullMsg = {
         text: msg.text,
         time: Date.now(),
-        username: "jake",
+        username: username,
         avatar: "http://via.placeholder.com/30",
       };
       const roomTitle = Array.from(nsSocket.rooms);
