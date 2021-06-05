@@ -15,6 +15,8 @@ const io = socketio(expressServer, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
+///////////////////////////////////////
+// === CONNECTION TO MAIN NAMESPACE ===
 io.on("connection", (socket) => {
   // build an array to send back with the img and endpoint for each NS
   let nsData = namespaces.map((ns) => {
@@ -29,18 +31,24 @@ io.on("connection", (socket) => {
   socket.emit("nsList", nsData);
 });
 
+////////////////////////////////////////////////////////
+// === BUILD CONNECTION HANDLERS FOR EACH NAMESPACE ===
 // loop through each namespace and listen for a connection
 namespaces.forEach((namespace) => {
   io.of(namespace.endpoint).on("connection", (nsSocket) => {
+    // Get username from query parameters
     const username = nsSocket.handshake.query.username;
-    console.log(`${nsSocket.id} has joined ${namespace.endpoint}`);
 
     // Send the ns group info back
     nsSocket.emit("nsRoomLoad", namespace.rooms);
+
+    // A user joins a room
     nsSocket.on("joinRoom", async (roomToJoin) => {
-      // Leave current room and send updated room count to room.
+      // --- LEAVE CURRENT ROOM ---
+      // Get Current Room Name
       const currentRoom = Array.from(nsSocket.rooms)[1];
       nsSocket.leave(currentRoom);
+      // Get number of users in that room now that this user has left.
       const updatedNumUsers = await getNumUsersInRoom(
         namespace.endpoint,
         currentRoom
@@ -49,10 +57,10 @@ namespaces.forEach((namespace) => {
         .in(currentRoom)
         .emit("updateMembers", updatedNumUsers);
 
-      // Join Room
+      // --- JOIN NEW ROOM ---
       nsSocket.join(roomToJoin);
 
-      // Find the current room
+      // Find the current room object
       const nsRoom = namespace.rooms.find(
         (room) => room.roomTitle === Array.from(nsSocket.rooms)[1]
       );
@@ -65,6 +73,7 @@ namespaces.forEach((namespace) => {
       io.of(namespace.endpoint).in(roomToJoin).emit("updateMembers", numUsers);
     });
 
+    // Helper function to get the number of users in a room
     const getNumUsersInRoom = (namespace, room) => {
       return new Promise(async (resolve, reject) => {
         try {
@@ -77,9 +86,9 @@ namespaces.forEach((namespace) => {
       });
     };
 
+    // A User sends a new message to the server.
     nsSocket.on("newMessageToServer", (msg) => {
       // Send this mesage to ALL the sockets that are in the room that THIS socket is in.
-      //   console.log(nsSocket.rooms);
       const fullMsg = {
         text: msg.text,
         time: Date.now(),
@@ -93,7 +102,7 @@ namespaces.forEach((namespace) => {
         (room) => room.roomTitle === roomTitle[1]
       );
       nsRoom.addMessage(fullMsg);
-      //   console.log(nsRoom);
+
       io.of(namespace.endpoint)
         .to(roomTitle[1])
         .emit("messageToClients", fullMsg);
