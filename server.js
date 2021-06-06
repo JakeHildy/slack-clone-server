@@ -11,7 +11,7 @@ const {
   createNamespace,
 } = require("./controllers/namespaceController");
 
-let namespaces = require("./data/namespaces");
+// let namespaces = require("./data/namespaces");
 
 app.use(cors());
 
@@ -34,14 +34,15 @@ mongoose
 
 // Create some fake namespace data:
 // createNamespace({
-//   nsTitle: "testNamespace",
-//   img: "https://www.mozilla.org/media/img/logos/firefox/logo-quantum.9c5e96634f92.png",
-//   endpoint: "/test",
+//   nsTitle: "Linux",
+//   img: "https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png",
+//   endpoint: "/linux",
 //   rooms: [],
 // });
 
+let namespaces = [];
 getAllNamespaces().then((data) => {
-  console.log(data);
+  namespaces = data;
 });
 
 ///////////////////////////////////////////
