@@ -1,14 +1,53 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const app = express();
 const socketio = require("socket.io");
 const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config({ path: ".env" });
+const PORT = process.env.PORT;
+const {
+  getAllNamespaces,
+  createNamespace,
+} = require("./controllers/namespaceController");
 
 let namespaces = require("./data/namespaces");
 
 app.use(cors());
 
-const expressServer = app.listen(9000, () => {
-  console.log(`App listening on port 9000`);
+///////////////////////////////////////////
+// CONNECT TO DATABASE
+const DB = process.env.DATABASE.replace(
+  "password",
+  process.env.DATABASE_PASSWORD
+);
+
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("DB connection successful!"))
+  .catch((err) => console.log(err));
+
+// Create some fake namespace data:
+// createNamespace({
+//   nsTitle: "testNamespace",
+//   img: "https://www.mozilla.org/media/img/logos/firefox/logo-quantum.9c5e96634f92.png",
+//   endpoint: "/test",
+//   rooms: [],
+// });
+
+getAllNamespaces().then((data) => {
+  console.log(data);
+});
+
+///////////////////////////////////////////
+// START SERVER
+const expressServer = app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
 });
 
 const io = socketio(expressServer, {
