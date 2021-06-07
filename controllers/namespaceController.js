@@ -1,4 +1,3 @@
-const { listeners } = require("./../models/namespaceModel");
 const Namespace = require("./../models/namespaceModel");
 
 exports.getAllNamespaces = async () => {
@@ -38,7 +37,6 @@ exports.addMessageToRoom = async (nsTitle, roomTitle, msg) => {
     const namespace = namespaces[0];
     const room = namespace.rooms.find((room) => room.roomTitle === roomTitle);
     room.history.push(msg);
-    console.log(namespace);
     namespace.markModified("rooms");
     namespace.save();
     return namespace;
