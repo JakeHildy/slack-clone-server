@@ -121,7 +121,7 @@ const io = socketio(expressServer, {
           }
         });
       };
-
+      // test that
       // === NEW MESSAGE SENT TO SERVER ===
       nsSocket.on("newMessageToServer", async (msg) => {
         // Send this mesage to ALL the sockets that are in the room that THIS socket is in.
