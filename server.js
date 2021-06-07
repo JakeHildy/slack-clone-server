@@ -8,13 +8,9 @@ dotenv.config({ path: ".env" });
 const PORT = process.env.PORT;
 const {
   getAllNamespaces,
-  createNamespace,
-  addRoomToNamespace,
   addMessageToRoom,
   getRoom,
 } = require("./controllers/namespaceController");
-
-// let namespaces = require("./data/namespaces");
 
 app.use(cors());
 
@@ -35,25 +31,6 @@ mongoose
   .then(() => console.log("DB connection successful!"))
   .catch((err) => console.log(err));
 
-// Create some fake namespace data:
-// createNamespace({
-//   nsTitle: "Wiki",
-//   img: "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png",
-//   endpoint: "/wiki",
-//   rooms: [],
-// });
-
-// (async function () {
-//   const room = {
-//     roomTitle: "Other",
-//     namespace: "Wiki",
-//     privateRoom: false,
-//     history: [],
-//   };
-
-//   const updatedNamespace = await addRoomToNamespace("Wiki", room);
-// })();
-
 ///////////////////////////////////////////
 // START SERVER
 const expressServer = app.listen(PORT, () => {
@@ -64,16 +41,12 @@ const io = socketio(expressServer, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
-///////////////////////////////////////
-// === CONNECTION TO MAIN NAMESPACE ===
-// let namespaces = [];
-// getAllNamespaces().then((data) => {
-//   namespaces = data;
-// });
-
+// Need to wrap everything in an anonymous function so we can await things
 (async function () {
   const namespaces = await getAllNamespaces();
 
+  ///////////////////////////////////////
+  // === CONNECTION TO MAIN NAMESPACE ===
   io.on("connection", (socket) => {
     // build an array to send back with the img and endpoint for each NS
     let nsData = namespaces.map((ns) => {
