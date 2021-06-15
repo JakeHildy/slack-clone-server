@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const userRouter = require("./routes/userRoutes");
 const app = express();
 const socketio = require("socket.io");
 const cors = require("cors");
@@ -12,7 +13,14 @@ const {
   getRoom,
 } = require("./controllers/namespaceController");
 
+///////////////////////////////////////////
+// MIDDLEWARE
 app.use(cors());
+app.use(express.json());
+
+///////////////////////////////////////////
+// ROUTES
+app.use("/api/v1/users", userRouter);
 
 ///////////////////////////////////////////
 // CONNECT TO DATABASE
@@ -121,7 +129,7 @@ const io = socketio(expressServer, {
           }
         });
       };
-      // test that
+
       // === NEW MESSAGE SENT TO SERVER ===
       nsSocket.on("newMessageToServer", async (msg) => {
         // Send this mesage to ALL the sockets that are in the room that THIS socket is in.
