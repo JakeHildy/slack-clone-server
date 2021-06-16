@@ -17,3 +17,16 @@ exports.createUser = async (req, res) => {
     res.status(400).json({ message: "failed", err });
   }
 };
+
+exports.getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user)
+      return res
+        .status(404)
+        .json({ status: "fail", message: "user not found" });
+    res.status(201).json({ status: "success", user });
+  } catch (err) {
+    res.status(400).json({ message: "failed", err });
+  }
+};
