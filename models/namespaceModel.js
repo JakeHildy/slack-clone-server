@@ -15,7 +15,14 @@ const namespaceSchema = new mongoose.Schema({
     required: [true, "A Namespace must have an endpoint."],
     unique: true,
   },
-  rooms: [],
+  rooms: [
+    {
+      roomTitle: String,
+      namespace: String,
+      privateRoom: { type: Boolean, default: false },
+      history: [],
+    },
+  ],
 });
 
 const Namespace = mongoose.model("Namespace", namespaceSchema);

@@ -59,6 +59,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log(email, password);
   try {
     const users = await User.find({ email });
     if (users.length !== 1) throw Error();

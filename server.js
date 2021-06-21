@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRouter = require("./routes/userRoutes");
+const namespaceRouter = require("./routes/namespaceRoutes");
 const app = express();
 const socketio = require("socket.io");
 const cors = require("cors");
@@ -8,7 +9,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: ".env" });
 const PORT = process.env.PORT;
 const {
-  getAllNamespaces,
+  getAllNamespacesLocal,
   addMessageToRoom,
   getRoom,
 } = require("./controllers/namespaceController");
@@ -21,6 +22,7 @@ app.use(express.json());
 ///////////////////////////////////////////
 // ROUTES
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/namespaces", namespaceRouter);
 
 ///////////////////////////////////////////
 // CONNECT TO DATABASE
@@ -51,7 +53,7 @@ const io = socketio(expressServer, {
 
 // Need to wrap everything in an anonymous function so we can await things
 (async function () {
-  const namespaces = await getAllNamespaces();
+  const namespaces = await getAllNamespacesLocal();
 
   ///////////////////////////////////////
   // === CONNECTION TO MAIN NAMESPACE ===
@@ -75,7 +77,7 @@ const io = socketio(expressServer, {
   namespaces.forEach((namespace) => {
     io.of(namespace.endpoint).on("connection", (nsSocket) => {
       // Get username from query parameters
-      const username = nsSocket.handshake.query.username;
+      const id = nsSocket.handshake.query.id;
 
       // Send the ns group info back
       nsSocket.emit("nsRoomLoad", namespace.rooms);
@@ -136,8 +138,7 @@ const io = socketio(expressServer, {
         const fullMsg = {
           text: msg.text,
           time: Date.now(),
-          username: username,
-          avatar: "http://via.placeholder.com/30",
+          id: id,
         };
         const roomTitle = Array.from(nsSocket.rooms);
 

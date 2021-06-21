@@ -1,6 +1,15 @@
 const Namespace = require("./../models/namespaceModel");
 
-exports.getAllNamespaces = async () => {
+exports.getAllNamespaces = async (req, res) => {
+  try {
+    const namespaces = await Namespace.find();
+    res.status(200).json({ status: "success", namespaces });
+  } catch (err) {
+    res.status(400).json({ message: "failed", err });
+  }
+};
+
+exports.getAllNamespacesLocal = async () => {
   try {
     const namespaces = await Namespace.find();
     return namespaces;
@@ -9,24 +18,25 @@ exports.getAllNamespaces = async () => {
   }
 };
 
-exports.createNamespace = async (initData) => {
+exports.createNamespace = async (req, res) => {
   try {
-    const newNamespace = await Namespace.create(initData);
-    return newNamespace;
+    const newNamespace = await Namespace.create(req.body);
+    res.status(200).json({ status: "success", newNamespace });
   } catch (err) {
-    console.log(err);
+    res.status(400).json({ message: "failed", err });
   }
 };
 
-exports.addRoomToNamespace = async (nsTitle, room) => {
+exports.addRoomToNamespace = async (req, res) => {
   try {
+    const { nsTitle, room } = req.body;
     const namespaces = await Namespace.find({ nsTitle: nsTitle });
     let namespace = namespaces[0];
     namespace.rooms.push(room);
     namespace = await namespace.save();
-    return namespace;
+    res.status(200).json({ status: "success", namespace });
   } catch (err) {
-    console.log(err);
+    res.status(400).json({ status: "fail  ", err });
   }
 };
 
