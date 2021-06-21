@@ -138,7 +138,7 @@ const io = socketio(expressServer, {
         const fullMsg = {
           text: msg.text,
           time: Date.now(),
-          id: id,
+          userId: msg.id,
         };
         const roomTitle = Array.from(nsSocket.rooms);
 
