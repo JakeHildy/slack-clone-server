@@ -11,6 +11,8 @@ router
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
 
+router.route("/public/:id").get(userController.getUserPublicData);
+
 router
   .route("/")
   .get(userController.getAllUsers)
