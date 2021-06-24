@@ -77,7 +77,6 @@ exports.deleteUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
   try {
     const users = await User.find({ email });
     if (users.length !== 1) throw Error();
@@ -86,7 +85,12 @@ exports.loginUser = async (req, res) => {
 
     // User Authenticated
     let token = jwt.sign({ username: user.username }, process.env.JWT_KEY);
-    res.status(200).json({ token, id: user._id, username: user.username });
+    res.status(200).json({
+      token,
+      userId: user._id,
+      username: user.username,
+      avatarConfig: user.avatarConfig,
+    });
   } catch (err) {
     res.status(400).json({ message: "failed", err });
   }
