@@ -26,6 +26,7 @@ app.use("/api/v1/namespaces", namespaceRouter);
 
 ///////////////////////////////////////////
 // CONNECT TO DATABASE
+// UPDATE
 const DB = process.env.DATABASE.replace(
   "password",
   process.env.DATABASE_PASSWORD
